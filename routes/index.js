@@ -1,8 +1,9 @@
 const express = require('express');
+const path = require('path');
 const router = express.Router();
 const { Client } = require('pg');
 
-// Conexión a PostgreSQL usando la variable de entorno
+// Conexión a PostgreSQL usando DATABASE_URL
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
@@ -12,9 +13,9 @@ client.connect()
   .then(() => console.log('✅ Conectado a PostgreSQL desde rutas'))
   .catch(err => console.error('❌ Error al conectar desde rutas:', err));
 
-// Ruta principal
+// Ruta HTML raíz
 router.get('/', (req, res) => {
-  res.send('Bienvenido a la API de participantes');
+  res.sendFile(path.join(__dirname, '../views/index.html'));
 });
 
 // GET /participantes
@@ -23,6 +24,7 @@ router.get('/participantes', async (req, res) => {
     const result = await client.query('SELECT * FROM participantes');
     res.json(result.rows);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error al obtener participantes' });
   }
 });
